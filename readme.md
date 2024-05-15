@@ -1,0 +1,1 @@
+This is a repository of Kusto Query Language (KQL) queries that I have created over time. 
