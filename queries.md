@@ -27,7 +27,7 @@ resources
 
 ### Azure Arc enabled server and SQL information
 
-This query gives an overview of the servers that have an Arc agent installed. It also looks to see if there is a SQL instance installed on the server and lists out the version if there is.  It displays the name of the server, Arc agent version installed, current status of the agent, the SQL version identified, the Azure location, Azure Resource Group name and Azure subscription ID.
+This query gives an overview of the servers that have an Arc agent installed. It also looks to see if there is a SQL instance installed on the server and lists out the version if there is.  It displays the name of the server, Arc agent version installed, current status of the agent, the SQL version identified, SQL edition the Azure location, Azure Resource Group name and Azure subscription ID.
 
 ```bash
 resources
@@ -46,7 +46,8 @@ resources
 | where type == 'microsoft.azurearcdata/sqlserverinstances'
 | extend status = properties.status
 | extend sqlversion = properties.version
-| project name, sqlversion
+| extend edition = properties.edition
+| project name, sqlversion, edition
 ) on $left.name == $right.name
-| project name, agentversion, status, resourceGroup, location, sqlversion, subscriptionId
+| project name, agentversion, status, resourceGroup, location, sqlversion, edition, subscriptionId
 ```
