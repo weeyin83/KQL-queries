@@ -4,6 +4,8 @@
 - [Azure Arc enabled resource count](#azure-arc-enabled-resource-count)
 - [Azure Arc enabled resource count map](#azure-arc-enabled-resource-count-map)
 - [Azure Arc enabled server and SQL information](#azure-arc-enabled-server-and-sql-information)
+- [Azure Arc-enabled agent status count](#azure-arc-enabled-server-agent-status-count)
+- [Azure Arc-enabled server agent status](#azure-arc-enabled-server-agent-status)
 
 ### Azure Arc enabled resource count
 
@@ -50,4 +52,53 @@ resources
 | project name, sqlversion, edition
 ) on $left.name == $right.name
 | project name, agentversion, status, resourceGroup, location, sqlversion, edition, subscriptionId
+```
+
+### Azure Arc-enabled server agent status count
+
+There are five different status that an Azure Arc agent can have.  These each have different meanings and troubleshooting steps to be followed. 
+
+This query looks at all the Arc-enabled servers in the environment and counts how many are sitting in each status.  The 5 statuses are:
+
+1. **Connected**: The agent communicates successfully with the Azure Arc service, actively sending data and receiving instructions. This is the desired state for a healthy agent.
+
+2. **Disconnected**: Indicates loss of communication with the Azure Arc service. Investigate network issues, misconfiguration, or interruptions to restore connectivity.
+
+3. **Offline**: The agent is not currently running or unable to communicate with Azure Arc. Unlike "Disconnected," this suggests a more prolonged interruption. Troubleshoot, check health, and ensure the agent is running.
+
+4. **Error**: Something has gone wrong with the agent (e.g., misconfiguration, incompatible environment). Investigate error messages or logs for specifics and take corrective actions.
+
+5. **Expired**: Applies to certificates or tokens used for authentication. Renew or update credentials promptly to resolve this status.
+
+```bash
+resources 
+| where type =~ 'microsoft.hybridcompute/machines' 
+| summarize count() by tostring(properties.status)
+```
+
+### Azure Arc-enabled server agent status
+
+There are five different status that an Azure Arc agent can have.  These each have different meanings and troubleshooting steps to be followed.
+
+This query specifically looks for the Connected agents, however if you change the properties.status field to one of the other statuses it will find those for you.
+
+The 5 statuses are:
+
+1. **Connected**: The agent communicates successfully with the Azure Arc service, actively sending data and receiving instructions. This is the desired state for a healthy agent.
+
+2. **Disconnected**: Indicates loss of communication with the Azure Arc service. Investigate network issues, misconfiguration, or interruptions to restore connectivity.
+
+3. **Offline**: The agent is not currently running or unable to communicate with Azure Arc. Unlike "Disconnected," this suggests a more prolonged interruption. Troubleshoot, check health, and ensure the agent is running.
+
+4. **Error**: Something has gone wrong with the agent (e.g., misconfiguration, incompatible environment). Investigate error messages or logs for specifics and take corrective actions.
+
+5. **Expired**: Applies to certificates or tokens used for authentication. Renew or update credentials promptly to resolve this status.
+
+```bash
+resources
+| where type == 'microsoft.hybridcompute/machines' and properties.status=='Connected'
+| extend agentversion = properties.agentVersion
+| extend state = properties.status
+| project name, agentversion, state, location, resourceGroup, subscriptionId
+| order by name
 ```
