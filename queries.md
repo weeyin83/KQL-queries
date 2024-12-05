@@ -102,3 +102,16 @@ resources
 | project name, agentversion, state, location, resourceGroup, subscriptionId
 | order by name
 ```
+
+### Azure Arc-enabled SQL server compatibility level
+
+Show the level of each SQL database from all the Azure Arc-enabled SQL servers. 
+
+```bash
+resources
+resources
+| where type == "microsoft.azurearcdata/sqlserverinstances/databases"
+| extend state = properties.state, compat = properties.compatibilityLevel, recoveryMode = properties.recoveryMode
+| project name, state, compat, recoveryMode
+| summarize  count() by tostring(compat)
+```
